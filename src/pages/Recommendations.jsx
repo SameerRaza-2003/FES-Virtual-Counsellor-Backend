@@ -6,7 +6,7 @@ export default function FESGuide() {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hi! 👋 I’m your FES Guide. Ask me anything about study abroad, applications, or services."
+      text: "Hi! 👋 I’m your Virtual Counsellor Mentora. Ask me anything about study abroad, applications, or services."
     }
   ]);
   const [input, setInput] = useState("");
@@ -34,8 +34,9 @@ export default function FESGuide() {
     setMessages((prev) => [...prev, { sender: "bot", text: "Thinking..." }]);
 
     const eventSource = new EventSource(
-      `http://localhost:8000/stream?q=${encodeURIComponent(text)}`
-    );
+  `https://fes-mentoro-backend.onrender.com/stream?q=${encodeURIComponent(text)}`
+);
+
 
     let responseText = "";
 
@@ -89,7 +90,7 @@ export default function FESGuide() {
     <div className="flex h-screen bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#0ea5e9] text-white font-sans">
       {/* Left Sidebar */}
       <div className="w-72 flex-shrink-0 bg-white/10 flex flex-col p-4">
-        <h1 className="text-2xl font-bold mb-6">FES Guide</h1>
+        <h1 className="text-2xl font-bold mb-6">Mentora</h1>
         <h2 className="text-sm opacity-80 mb-2">FAQs</h2>
         <div className="flex-1 overflow-y-auto space-y-2 sticky top-0">
           {faqs.map((faq, idx) => (
@@ -113,7 +114,7 @@ export default function FESGuide() {
       <div className="flex-1 flex flex-col mx-auto max-w-5xl p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 px-4 py-2 bg-white/10 rounded-xl shadow-md">
-          <h2 className="text-xl font-semibold">FES Guide Chat</h2>
+          <h2 className="text-xl font-semibold">FES Mentora</h2>
         </div>
 
         {/* Messages */}
