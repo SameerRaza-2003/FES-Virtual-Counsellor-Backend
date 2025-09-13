@@ -11,6 +11,7 @@ export default function FESGuide() {
   ]);
   const [input, setInput] = useState("");
   const [activeFAQ, setActiveFAQ] = useState(null);
+  const [showSidebar, setShowSidebar] = useState(false); // 📱 for mobile toggle
   const messagesEndRef = useRef(null);
 
   const faqs = [
@@ -27,16 +28,12 @@ export default function FESGuide() {
   const sendMessage = (text) => {
     if (!text.trim()) return;
 
-    // Add user message
     setMessages((prev) => [...prev, { sender: "user", text }]);
-
-    // Add placeholder bot message
     setMessages((prev) => [...prev, { sender: "bot", text: "Thinking..." }]);
 
     const eventSource = new EventSource(
-  `https://fes-mentoro-backend.onrender.com/stream?q=${encodeURIComponent(text)}`
-);
-
+      `https://fes-mentoro-backend.onrender.com/stream?q=${encodeURIComponent(text)}`
+    );
 
     let responseText = "";
 
@@ -45,14 +42,12 @@ export default function FESGuide() {
         eventSource.close();
       } else {
         if (responseText === "") {
-          // Replace "Thinking..." with first chunk
           setMessages((prev) => {
             const copy = [...prev];
             copy[copy.length - 1] = { sender: "bot", text: e.data };
             return copy;
           });
         } else {
-          // Append streaming text
           setMessages((prev) => {
             const copy = [...prev];
             copy[copy.length - 1] = {
@@ -88,21 +83,20 @@ export default function FESGuide() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#0ea5e9] text-white font-sans">
-      {/* Left Sidebar */}
-      <div className="w-72 flex-shrink-0 bg-white/10 flex flex-col p-4">
+      {/* Sidebar (hidden on mobile) */}
+      <div className={`fixed inset-0 z-30 bg-[#0f172a]/95 p-4 transition-transform duration-300 md:static md:w-72 md:flex-shrink-0 md:bg-white/10 ${showSidebar ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
         <h1 className="text-2xl font-bold mb-6">Mentora</h1>
         <h2 className="text-sm opacity-80 mb-2">FAQs</h2>
-        <div className="flex-1 overflow-y-auto space-y-2 sticky top-0">
+        <div className="flex-1 overflow-y-auto space-y-2">
           {faqs.map((faq, idx) => (
             <button
               key={idx}
               onClick={() => {
                 setActiveFAQ(idx);
                 sendMessage(faq);
+                setShowSidebar(false);
               }}
-              className={`w-full text-left px-3 py-2 rounded-lg hover:bg-white/20 transition-colors ${
-                activeFAQ === idx ? "bg-white/20" : ""
-              }`}
+              className={`w-full text-left px-3 py-2 rounded-lg hover:bg-white/20 transition-colors ${activeFAQ === idx ? "bg-white/20" : ""}`}
             >
               {faq}
             </button>
@@ -110,15 +104,22 @@ export default function FESGuide() {
         </div>
       </div>
 
-      {/* Main Chat Panel */}
-      <div className="flex-1 flex flex-col mx-auto max-w-5xl p-6">
+      {/* Main Panel */}
+      <div className="flex-1 flex flex-col mx-auto w-full max-w-5xl p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 px-4 py-2 bg-white/10 rounded-xl shadow-md">
-          <h2 className="text-xl font-semibold">FES Mentora</h2>
+          <h2 className="text-lg sm:text-xl font-semibold">FES Mentora</h2>
+          {/* Mobile FAQ toggle */}
+          <button
+            className="md:hidden px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
+            onClick={() => setShowSidebar(!showSidebar)}
+          >
+            FAQs
+          </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-3 mb-4 px-4">
+        <div className="flex-1 overflow-y-auto space-y-4 mb-4 px-2 sm:px-4">
           {messages.map((msg, idx) => (
             <div
               key={idx}
@@ -127,10 +128,10 @@ export default function FESGuide() {
               <motion.div
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`px-5 py-3 rounded-2xl break-words max-w-[70%] leading-snug ${
+                className={`px-4 py-3 rounded-2xl break-words max-w-[85%] sm:max-w-[70%] leading-relaxed text-sm sm:text-base ${
                   msg.sender === "bot"
-                    ? "bg-white/10 border border-white/20 text-blue-100 hover:bg-white/20"
-                    : "bg-gradient-to-r from-sky-500 to-cyan-400 text-white hover:shadow-lg"
+                    ? "bg-white/10 border border-white/20 text-blue-100 prose prose-invert max-w-none"
+                    : "bg-gradient-to-r from-sky-500 to-cyan-400 text-white shadow-md"
                 }`}
               >
                 {msg.text === "Thinking..." ? (
@@ -144,7 +145,12 @@ export default function FESGuide() {
                   </div>
                 ) : (
                   <ReactMarkdown
-                    components={{ p: ({ children }) => <p className="m-0">{children}</p> }}
+                    className="prose prose-invert text-sm sm:text-base leading-relaxed"
+                    components={{
+                      p: ({ children }) => <p className="m-0 mb-2">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc ml-5 mb-2">{children}</ul>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                    }}
                   >
                     {msg.text}
                   </ReactMarkdown>
@@ -156,9 +162,9 @@ export default function FESGuide() {
         </div>
 
         {/* Input */}
-        <div className="flex gap-2 px-4">
+        <div className="flex gap-2 px-2 sm:px-4 pb-3">
           <input
-            className="flex-1 p-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-400"
+            className="flex-1 p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-300 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-sky-400"
             placeholder="Ask me anything..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -166,7 +172,7 @@ export default function FESGuide() {
           />
           <button
             onClick={handleSend}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 shadow-lg hover:scale-105 transition-transform"
+            className="px-4 sm:px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 shadow-lg hover:scale-105 transition-transform text-sm sm:text-base"
           >
             Send
           </button>
