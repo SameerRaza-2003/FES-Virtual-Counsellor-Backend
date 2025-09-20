@@ -8,8 +8,7 @@ from pinecone import Pinecone
 # =============================================
 # 🔑 API KEYS (as requested, embedded directly)
 # =============================================
-OPENAI_API_KEY = "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"
-PINECONE_API_KEY = "pcsk_YkX1a_8iXuzvBydjKxwtskMixoTGj4vKSjttu1JUcjHLTRUEn65eadRZKBfmbEFubKKcu"
+#apikeys were here
 
 # =============================================
 # ⚙️ CONFIG
